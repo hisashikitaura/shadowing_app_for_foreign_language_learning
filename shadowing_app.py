@@ -1,7 +1,5 @@
 import streamlit as st
-from llama_index.core.llms import ChatMessage
-from llama_index.llms.openai import OpenAI
-from llama_index.core import PromptTemplate
+import openai
 
 import os
 from pathlib import Path
@@ -10,7 +8,12 @@ from dotenv import load_dotenv
 import uuid
 import time
 
-import openai
+from llms.utils import use_openai_gpt_4o_mini, use_nvidia_nim_meta_llama_3_2_3b_instruct
+
+# model
+OPENAI_GPT_4O_MINI = "OpenAI/gpt-4o-mini"
+NVIDIA_NIM_META_LLAMA_3_2_3B_INSTRUCT = "NVIDIA NIM/meta/llama-3.2-3b-instruct"
+
 
 load_dotenv()
 
@@ -20,7 +23,6 @@ file_save_path = Path("__file__").parent / "speeches"
 st.set_page_config(page_title ="🐶🐶Shadowing App")
 st.title('🐶🐶Shadowing🐶🐶')
 st.logo(image="./image/dog.png", size="medium", link=None, icon_image=None)
-# openai_api_key = st.sidebar.text_input('OpenAI API Key', type='password')
 
 
 
@@ -47,42 +49,22 @@ def create_path(base_path:str, dir_name:str="temp"):
 
 
 
-def generate_text(language_name="English", topic="Foods", num_sentences=5, level="Beginner"):
+def generate_text(language_name="English", topic="Foods", num_sentences=5, level="Beginner", model=OPENAI_GPT_4O_MINI):
   """
   Generate text for shadowing practice.
   """
-  ASSISTANT = "assistant:"
-  llm = ChatMessage(model='gpt-4o-mini',
-                   temperature=0.8,
-                   max_tokens=None,
-                   timeout=None,
-                   max_retries=2,
-                   openai_api_key=openai_api_key)
-  template = '''
-              I will make a shadowing practice app for {language_name} Language Learners.
-              In shadowing practice, a teacher (may be a computer) reads a {language_name} sentence by sentence aloud, and learners repeat at the same pace, with a slight delay if possible.
-              
-              As for the {language_name} materials, generate {language_name} text for {language_name} Language Learners.
-                -- Topic: {topic}
-                -- Number of the sentences: Approx. {num_sentences}                
-                -- Skill level: {level}, defined by the Common European Framework of Reference for Languages (CEFR)
-              Just the text. No words needed.
-              No numbering at the beginning of the sentences.
-              Enclose each sentence in <p> tag.
-              '''
+  if model == OPENAI_GPT_4O_MINI:
+    text = use_openai_gpt_4o_mini(language_name, topic, num_sentences, level, openai_api_key)
+  elif model == NVIDIA_NIM_META_LLAMA_3_2_3B_INSTRUCT:
+    text = use_nvidia_nim_meta_llama_3_2_3b_instruct(language_name, topic, num_sentences, level)
+  else:
+    "Please select a model."
 
-  qa_template = PromptTemplate(template)
-  prompt = qa_template.format(language_name=language_name, topic=topic, num_sentences=num_sentences, level=level)
-  messages = [
-              ChatMessage(role="system", content="You're a text generator that a user wants. No talks."),
-              ChatMessage(role="user", content=prompt)
-            ]
-  res_text = OpenAI().chat(messages)
-  return str(res_text).replace(ASSISTANT, "").strip()
+  return text
 
 
 
-def create_speech(text:str):
+def create_speech(text:str, path:str=None, id:str=None):
   """
   Create speech with TTS model.
   This function is for one sentence.
@@ -91,8 +73,7 @@ def create_speech(text:str):
   sentences = []
   sentences = re.findall('<p>(.*?)</p>', text)
   
-  id = get_id()
-  file_save_path = create_path(file_save_path, id)
+  file_save_path = create_path(path, id)
 
   for i, s in enumerate(sentences):
     """
@@ -105,14 +86,21 @@ def create_speech(text:str):
       speed=1,
     ) as response:
       try:
-        response.stream_to_file(f"{file_save_path}/{i}_.mp3")
+        response.stream_to_file(f"{file_save_path}/{i}.mp3")
       except Exception as e:
         st.error(e)
 
 
 
-@st.dialog("The shadowing practice text")
-def show_text(text):
+def save_speech(text:str, id:str=None):
+  """
+  Save the generated text to database.
+
+  """
+  pass
+
+@st.dialog("Your favorite text??")
+def show_text(text, path):
   """
   This shows modal dialog with the generated text.
   And a user has to choose one.
@@ -121,8 +109,11 @@ def show_text(text):
   if st.button("OK"):
     st.balloons()
     time.sleep(2)
-    st.success("Let's practice!", icon="👍")
-    create_speech(text)
+    st.success("Fantastic!!", icon="👍")
+    id = get_id()
+    create_speech(text, path, id)
+    save_speech(text, id)
+    st.rerun()
   if st.button("Cancel"):
     st.info("Don't go away and let's practice!", icon="👍")
     st.rerun()    
@@ -141,16 +132,18 @@ with st.form('Foreign Language Sentence Generator'):
     "How many sentences do you read aloud? :", ("3", "5", "10", "15", "20")
   )
   level = st.selectbox(
-    "Your skill level:",
+    "What is your skill level? :",
     ("Beginner", "Elementary", "Intermediate", "Upper Intermediate", "Advanced", "Proficiency"),
+  )
+  st.divider()
+  model = st.selectbox(
+    "[Optional] Which model do you use? :",
+    (OPENAI_GPT_4O_MINI, NVIDIA_NIM_META_LLAMA_3_2_3B_INSTRUCT),
   )
 
   submitted = st.form_submit_button('Submit')
-  if not openai_api_key.startswith('sk-'):
-    st.warning('Please enter your OpenAI API key in the .env file!', icon='⚠')
-  elif submitted:
-    st.divider()
-    text = generate_text(language_name, topic, num_sentences, level)
-    show_text(text)
+  if submitted:
+    text = generate_text(language_name, topic, num_sentences, level, model)
+    show_text(text, file_save_path)
 
  

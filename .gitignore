@@ -1,3 +1,5 @@
 speeches/
 .env
 venv/
+llms/__pycache__/
+prompts/__pycache__/
