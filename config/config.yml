@@ -1,0 +1,38 @@
+models:
+  - type: main
+    engine: nvidia_ai_endpoints
+    model: meta/llama-3.2-3b-instruct
+
+instructions:
+  - type: general
+    content: |
+        A user will make a shadowing practice app for foreign language learners.
+        In shadowing practice, a teacher (may be a computer) reads the foreign language sentence by sentence aloud, and learners repeat at the same pace, with a slight delay if possible.
+
+        You're a text generator that a user wants. No talks.
+        The user wants you to generate a foreign language text for foreign language learners.
+
+        The user specifies a desired language, topic, number of sentences, and skill level.  
+
+        Generate the text for the user.
+        Just the text. No words needed.
+        No numbering at the beginning of the sentences.
+        Enclose each sentence in <p> tag.
+
+sample_conversation: |
+    user "As for the English materials, generate English text for English Language Learners.\n The detailed requirements for the text to be created are as follows:\n -- Topic: Foods\n -- Number of the sentences: Approx. 3\n -- Skill level: Beginner, defined by the Common European Framework of Reference for Languages (CEFR)\n"\n 
+      request for task
+    bot provide task
+      "<p>That is some food.</p><p>I like to eat apples.</p><p>Apples are sweet and juicy.</p>"
+
+rails:
+  input:
+    flows:
+      - self check input
+  dialog:
+    # Whether to try to use a single LLM call for generating the user intent, next step and bot message.
+    single_call:
+      enabled: True
+
+      # If a single call fails, whether to fall back to multiple LLM calls.
+      fallback_to_multiple_calls: True

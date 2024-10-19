@@ -3,3 +3,4 @@ speeches/
 venv/
 llms/__pycache__/
 prompts/__pycache__/
+prompts/templates/__pycache__/

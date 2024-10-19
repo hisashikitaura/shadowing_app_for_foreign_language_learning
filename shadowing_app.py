@@ -5,15 +5,18 @@ import os
 from pathlib import Path
 import re
 from dotenv import load_dotenv
+import dotenv
 import uuid
 import time
 
-from llms.utils import use_openai_gpt_4o_mini, use_nvidia_nim_meta_llama_3_2_3b_instruct
+from llms.utils import use_openai_gpt_4o_mini, use_nvidia_nim_meta_llama_3_2_3b_instruct, use_nvidia_guardrails
 
 # model
 OPENAI_GPT_4O_MINI = "OpenAI/gpt-4o-mini"
 NVIDIA_NIM_META_LLAMA_3_2_3B_INSTRUCT = "NVIDIA NIM/meta/llama-3.2-3b-instruct"
+NVIDIA_NIM_GUARDRAILS = "NVIDIA Guardrails"
 
+model = NVIDIA_NIM_GUARDRAILS
 
 load_dotenv()
 
@@ -49,16 +52,18 @@ def create_path(base_path:str, dir_name:str="temp"):
 
 
 
-def generate_text(language_name="English", topic="Foods", num_sentences=5, level="Beginner", model=OPENAI_GPT_4O_MINI):
+def generate_text(language_name="English", topic="Foods", num_sentences=5, level="Beginner", model=NVIDIA_NIM_GUARDRAILS):
   """
   Generate text for shadowing practice.
   """
   if model == OPENAI_GPT_4O_MINI:
-    text = use_openai_gpt_4o_mini(language_name, topic, num_sentences, level, openai_api_key)
+    text = use_openai_gpt_4o_mini(language_name, topic, num_sentences, level)
   elif model == NVIDIA_NIM_META_LLAMA_3_2_3B_INSTRUCT:
     text = use_nvidia_nim_meta_llama_3_2_3b_instruct(language_name, topic, num_sentences, level)
+  elif model == NVIDIA_NIM_GUARDRAILS:
+    text = use_nvidia_guardrails(language_name, topic, num_sentences, level)    
   else:
-    "Please select a model."
+    st.error("😩Please select a model.😩", "😩")
 
   return text
 
@@ -88,7 +93,7 @@ def create_speech(text:str, path:str=None, id:str=None):
       try:
         response.stream_to_file(f"{file_save_path}/{i}.mp3")
       except Exception as e:
-        st.error(e)
+        st.error(e, "😩")
 
 
 
@@ -99,7 +104,7 @@ def save_speech(text:str, id:str=None):
   """
   pass
 
-@st.dialog("Your favorite text??")
+@st.dialog("😏Your favorite text??😏")
 def show_text(text, path):
   """
   This shows modal dialog with the generated text.
@@ -109,37 +114,46 @@ def show_text(text, path):
   if st.button("OK"):
     st.balloons()
     time.sleep(2)
-    st.success("Fantastic!!", icon="👍")
+    st.success("😍Fantastic!!😍", icon="😍")
     id = get_id()
     create_speech(text, path, id)
     save_speech(text, id)
     st.rerun()
   if st.button("Cancel"):
-    st.info("Don't go away and let's practice!", icon="👍")
+    st.info("😌Don't go away and let's practice!😌", icon="😌")
     st.rerun()    
 
 
 
 
-with st.form('Foreign Language Sentence Generator'):
+with st.form('🐮Foreign Language Sentence Generator🐮'):
   language_name = st.selectbox(
-    "What Languages do you learn? :",
+    "🐰What Languages do you learn?🐰 :",
     # ("Afrikaans", "Arabic", "Armenian", "Azerbaijani", "Belarusian", "Bosnian", "Bulgarian", "Catalan", "Chinese", "Croatian", "Czech", "Danish", "Dutch", "English", "Estonian", "Finnish", "French", "Galician", "German", "Greek", "Hebrew", "Hindi", "Hungarian", "Icelandic", "Indonesian", "Italian", "Japanese", "Kannada", "Kazakh", "Korean", "Latvian", "Lithuanian", "Macedonian", "Malay", "Marathi", "Maori", "Nepali", "Norwegian", "Persian", "Polish", "Portuguese", "Romanian", "Russian", "Serbian", "Slovak", "Slovenian", "Spanish", "Swahili", "Swedish", "Tagalog", "Tamil", "Thai", "Turkish", "Ukrainian", "Urdu", "Vietnamese", "Welsh"),
       ("English", "French", "German", "Italian", "Spanish", "Chinese"),
   )
-  topic = st.text_input('What topics interest you? :', 'Foods')
+  topic = st.text_input('🐻What topics interest you?🐻 :', 'Foods')
   num_sentences = st.selectbox(
-    "How many sentences do you read aloud? :", ("3", "5", "10", "15", "20")
+    "🐱How many sentences do you read aloud?🐱 :", ("3", "5", "10", "15", "20")
   )
   level = st.selectbox(
-    "What is your skill level? :",
+    "🐵What is your skill level?🐵 :",
     ("Beginner", "Elementary", "Intermediate", "Upper Intermediate", "Advanced", "Proficiency"),
   )
+
+  # **************************************************************************************************
+  
   st.divider()
-  model = st.selectbox(
-    "[Optional] Which model do you use? :",
-    (OPENAI_GPT_4O_MINI, NVIDIA_NIM_META_LLAMA_3_2_3B_INSTRUCT),
-  )
+  st.write("🥷🏽FOR DEVELOPER SETTINGS🥷🏽")
+  
+  # guardrails = True
+  guardrails = st.toggle("🦸🏼‍♀️[Optional] Do you want to use guardrails?🦸🏼‍♀️")
+  print(guardrails)
+  if not guardrails:
+    model = st.selectbox(
+      "🦹🏼‍♂️[Optional] Which model do you use?🦹🏼‍♂️ :",
+      (OPENAI_GPT_4O_MINI, NVIDIA_NIM_META_LLAMA_3_2_3B_INSTRUCT, NVIDIA_NIM_GUARDRAILS),
+    )
 
   submitted = st.form_submit_button('Submit')
   if submitted:
