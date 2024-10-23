@@ -10,6 +10,8 @@ import uuid
 import time
 
 from llms.utils import use_openai_gpt_4o_mini, use_nvidia_nim_meta_llama_3_2_3b_instruct, use_nvidia_guardrails
+from services.text_to_speech import run_openai_tts, run_nvidia_fastpitch_hifigan_tts
+from utils.utils import show_text
 
 # model
 OPENAI_GPT_4O_MINI = "OpenAI/gpt-4o-mini"
@@ -29,7 +31,7 @@ st.logo(image="./image/dog.png", size="medium", link=None, icon_image=None)
 
 
 
-def get_id():
+def get_uuid() -> str:
   """
   Get a unique id.
   This id is used for the folder and the file name.
@@ -37,8 +39,7 @@ def get_id():
   return str(uuid.uuid4())
 
 
-
-def create_path(base_path:str, dir_name:str="temp"):
+def create_path(base_path:str, dir_name:str="temp") -> str:
   """
   Create a directory for saving your favorite shadowing files.
   """
@@ -52,7 +53,7 @@ def create_path(base_path:str, dir_name:str="temp"):
 
 
 
-def generate_text(language_name="English", topic="Foods", num_sentences=5, level="Beginner", model=NVIDIA_NIM_GUARDRAILS):
+def generate_text(language_name="English", topic="Foods", num_sentences=5, level="Beginner", model=NVIDIA_NIM_GUARDRAILS) -> str:
   """
   Generate text for shadowing practice.
   """
@@ -68,62 +69,29 @@ def generate_text(language_name="English", topic="Foods", num_sentences=5, level
   return text
 
 
-
-def create_speech(text:str, path:str=None, id:str=None):
+def create_voice_file(text:str, path:str=None, uuid:int=0) -> None:
   """
   Create speech with TTS model.
   This function is for one sentence.
   """
+  print("Creating voice file...")
   # split the text into sentences
   sentences = []
   sentences = re.findall('<p>(.*?)</p>', text)
   
-  file_save_path = create_path(path, id)
+  file_save_path = create_path(path, uuid)
 
   for i, s in enumerate(sentences):
-    """
-    openai/resouces/audio/speech.py
-    """
-    with openai.audio.speech.with_streaming_response.create(
-      model="tts-1",
-      voice="nova", #'nova', 'shimmer', 'echo', 'onyx', 'fable' or 'alloy'
-      input=s,
-      speed=1,
-    ) as response:
-      try:
-        response.stream_to_file(f"{file_save_path}/{i}.mp3")
-      except Exception as e:
-        st.error(e, "😩")
+    resonse = run_nvidia_fastpitch_hifigan_tts(s, file_save_path, i)
 
 
-
-def save_speech(text:str, id:str=None):
+def store_text(text:str, uuid:str=None):
   """
   Save the generated text to database.
 
   """
+  print("Storing text...")
   pass
-
-@st.dialog("😏Your favorite text??😏")
-def show_text(text, path):
-  """
-  This shows modal dialog with the generated text.
-  And a user has to choose one.
-  """
-  st.html(text)
-  if st.button("OK"):
-    st.balloons()
-    time.sleep(2)
-    st.success("😍Fantastic!!😍", icon="😍")
-    id = get_id()
-    create_speech(text, path, id)
-    save_speech(text, id)
-    st.rerun()
-  if st.button("Cancel"):
-    st.info("😌Don't go away and let's practice!😌", icon="😌")
-    st.rerun()    
-
-
 
 
 with st.form('🐮Foreign Language Sentence Generator🐮'):
@@ -141,23 +109,56 @@ with st.form('🐮Foreign Language Sentence Generator🐮'):
     ("Beginner", "Elementary", "Intermediate", "Upper Intermediate", "Advanced", "Proficiency"),
   )
 
+  if "user" not in st.session_state:
+      # "create_voice_flag":  whether this program creates a voice file or not.
+    st.session_state.user = {"language_name": language_name, "topic": topic, "level": level, "text": None}
+  else:
+    st.session_state.user["language_name"] = language_name
+    st.session_state.user["topic"] = topic
+    st.session_state.user["level"] = level
+
   # **************************************************************************************************
   
   st.divider()
   st.write("🥷🏽FOR DEVELOPER SETTINGS🥷🏽")
   
   # guardrails = True
-  guardrails = st.toggle("🦸🏼‍♀️[Optional] Do you want to use guardrails?🦸🏼‍♀️")
+  guardrails = st.toggle("🦸🏼‍♀️[Optional] Do you want to use guardrails?🦸🏼‍♀️", True)
   print(guardrails)
   if not guardrails:
     model = st.selectbox(
       "🦹🏼‍♂️[Optional] Which model do you use?🦹🏼‍♂️ :",
-      (OPENAI_GPT_4O_MINI, NVIDIA_NIM_META_LLAMA_3_2_3B_INSTRUCT, NVIDIA_NIM_GUARDRAILS),
+      (NVIDIA_NIM_GUARDRAILS, OPENAI_GPT_4O_MINI, NVIDIA_NIM_META_LLAMA_3_2_3B_INSTRUCT),
     )
 
   submitted = st.form_submit_button('Submit')
   if submitted:
     text = generate_text(language_name, topic, num_sentences, level, model)
-    show_text(text, file_save_path)
+
+    if text == "I'm not sure what to say." or text == "I'm sorry, I can't respond to that.":
+      st.error("😩Please try again.😩", "😩")
+      st.stop()
+
+    if "flag" not in st.session_state:
+      # "create_voice_flag":  whether this program creates a voice file or not.
+      st.session_state.flag = {"create_voice_flag": False}
+    else:
+      st.session_state.flag["create_voice_flag"] = False
+
+    if not st.session_state.flag["create_voice_flag"]:
+      show_text(text)
+    print("create_voice_flag: ", st.session_state.flag["create_voice_flag"])
+
+    st.session_state.user["text"] = text
+
+  if "flag" not in st.session_state:
+    pass
+  elif st.session_state.flag["create_voice_flag"]:
+    uuid = get_uuid()
+    text = st.session_state.user["text"]
+    topic = st.session_state.user["topic"]
+    level = st.session_state.user["level"]
+    create_voice_file(text, file_save_path, uuid)
+    store_text(topic, level, text, uuid)
 
  

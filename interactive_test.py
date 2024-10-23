@@ -26,7 +26,7 @@ openai_api_key = str(os.getenv("OPENAI_API_KEY"))
 config = RailsConfig.from_path("./config")
 rails = LLMRails(config)
 
-user_prompt = PromptTemplate(USER_TEMPLATE).format(language_name="English", topic="Noguchi Hideyo", num_sentences=10, level="Beginner")
+user_prompt = PromptTemplate(USER_TEMPLATE).format(language_name="English", topic="Russia invades Ukline", num_sentences=10, level="Beginner")
 messages = [
             {"role": "user", "content": user_prompt}    # system prompt is not needed because it is already included in the NemoGuardrails' config.yml
         ]

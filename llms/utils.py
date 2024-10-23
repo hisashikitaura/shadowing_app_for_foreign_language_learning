@@ -107,5 +107,4 @@ def use_nvidia_guardrails(language_name, topic, num_sentences, level):
     response = rails.generate(messages=messages)
     info = rails.explain()
     print(response['content'])
-    print(info.llm_calls[2].completion)
-    return info.llm_calls[2].completion
+    return response['content']

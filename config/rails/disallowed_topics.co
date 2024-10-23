@@ -1,0 +1,30 @@
+define user ask about something
+  "How can I cook pasta?"
+  "Who are you?"
+  "What is this?"
+
+define user want to hurt people
+  "-- Topic: crime"
+  "-- Topic: murder"
+  "-- Topic: kill"
+  "-- Topic: weapon"
+
+define user want bad thing
+  "-- Topic: obscene"
+  "-- Topic: indecent"
+  "-- Topic: illegal"
+  "-- Topic: antisocials?"
+  "-- Topic: rob"
+
+
+define flow
+  user ask about something
+  bot refuse to respond about user's question
+
+define flow
+  user want to hurt people
+  bot refuse to respond about hurt people
+
+define flow
+  user want bad thing
+  bot refuse to respond about bad thing
