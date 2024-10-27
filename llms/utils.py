@@ -5,20 +5,14 @@ from openai import OpenAI as OpenAIOriginal
 
 from nemoguardrails import RailsConfig, LLMRails
 
-import getpass
 import os
-import json
-import dotenv
 
 import nest_asyncio
 
 from prompts.system_prompt import SYSTEM_PROMPT
 from prompts.templates.user_template import USER_TEMPLATE
 
-# model
-OPENAI_GPT_4O_MINI = "OpenAI/gpt-4o-mini"
-NVIDIA_NIM_META_LLAMA_3_2_3B_INSTRUCT = "NVIDIA NIM/meta/llama-3.2-3b-instruct"
-
+from config import Config
 
 nest_asyncio.apply()
 
@@ -39,6 +33,22 @@ def check_nvidia_api_key():
     return nvapi_key
 
 
+def generate_text(language_name="English", topic="Foods", num_sentences=5, level="Beginner", model=Config.NVIDIA_NIM_GUARDRAILS) -> str:
+  """
+  Generate text for shadowing practice.
+  """
+  if model == Config.OPENAI_GPT_4O_MINI:
+    text = use_openai_gpt_4o_mini(language_name, topic, num_sentences, level)
+  elif model == Config.NVIDIA_NIM_META_LLAMA_3_2_3B_INSTRUCT:
+    text = use_nvidia_nim_meta_llama_3_2_3b_instruct(language_name, topic, num_sentences, level)
+  elif model == Config.NVIDIA_NIM_GUARDRAILS:
+    text = use_nvidia_guardrails(language_name, topic, num_sentences, level)    
+  else:
+    st.error("😩Please select a model.😩", "😩")
+
+  return text
+
+
 def use_openai_gpt_4o_mini(language_name, topic, num_sentences, level, openai_api_key):
     """
     Use OpenAI's GPT-4o-mini model.
@@ -46,7 +56,7 @@ def use_openai_gpt_4o_mini(language_name, topic, num_sentences, level, openai_ap
     openai_api_key = check_openai_api_key()
 
     ASSISTANT = "assistant:"
-    llm = ChatMessage(model='gpt-4o-mini',
+    llm = ChatMessage(model=Config.GPT_4O_MINI,
                     temperature=0.8,
                     max_tokens=None,
                     timeout=None,
@@ -81,7 +91,7 @@ def use_nvidia_nim_meta_llama_3_2_3b_instruct(language_name, topic, num_sentence
             ]
 
     completion = client.chat.completions.create(
-        model="meta/llama-3.2-3b-instruct",
+        model=Config.META_LLAMA_3_2_3b_INSTRUCT,
         messages=messages,
         temperature=0.8,
         top_p=0.7,

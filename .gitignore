@@ -7,4 +7,5 @@ prompts/templates/__pycache__/
 *.mp3
 *.wav
 *.pyc
+*.txt
 sample.py
