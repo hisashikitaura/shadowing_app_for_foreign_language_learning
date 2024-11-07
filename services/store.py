@@ -14,7 +14,7 @@ def store_text(text:str, file_save_path:str, uuid:str):
   """
   print("Storing text...")
   with open(f"{file_save_path}/{uuid}/{uuid}.txt", "w", encoding=Config.UTF_8) as f:
-    f.write(remove_ptag(text, False))
+    f.write(text)
 
 
 def store_user_preference(text:str, file_save_path:str, uuid:str, topic:str, level:str, teacher:str, emotion:str) -> None:

@@ -86,20 +86,23 @@ def show_text(text) -> bool:
   And a user has to choose one.
   st.dialog function can't return a value.
   """
-  print(f"show_text: start")
-  _text = text.replace("<p>", "<p>💙")
-  sentences = re.findall('<p>(.*?)</p>', _text)
-  for s in sentences:
-    st.write_stream(stream_data(s))
-  print(f"show_text: end")
+  if st.session_state.flag["show_text"] == False:
+    print(f"show_text: start")
+    _text = text.replace("<p>", "<p>💙")
+    sentences = re.findall('<p>(.*?)</p>', _text)
+    for s in sentences:
+      st.write_stream(stream_data(s, 0.02))
+    print(f"show_text: end")
+    st.session_state.flag["show_text"] = True
 
-  if st.button("😍YES!😍", key=0):
+  if st.button("😍YES!😍", key=0, type="primary"):
     st.balloons()
     time.sleep(2)
     st.session_state.flag["create_voice_flag"] = True
     st.rerun()
-  if st.button("🙄I'll try again🙄", key=1):
-    st.session_state.flag["create_voice_flag"] = False     
+  if st.button("🙄I'll try again🙄", key=1, type="secondary"):
+    st.session_state.flag["create_voice_flag"] = False
+    st.session_state.flag["show_text"] = False 
     st.rerun()
 
 
@@ -165,8 +168,23 @@ def copy_file_with_error_handling(source_file, destination_dir):
         print(f"An error occurred: {e}")
         return False
 
-def stream_data(text:str):
+def stream_data(text:str, wait_time=0.01):
    print(f"stream_data: {text}")
    for word in text.split(" "):
       yield word + " "
-      time.sleep(0.01)
+      time.sleep(wait_time)
+
+
+def get_text_from_store(uuid:str, file_open_path:str) -> list:
+    with open(f"{file_open_path}/{uuid}/{uuid}.txt", "r", encoding=Config.UTF_8) as f:
+        text = f.read()
+
+    return text.replace("<p>", "<p>💙")
+
+
+def get_sentences(text:str) -> list:
+    return re.findall('<p>(.*?)</p>', text)
+
+
+def get_num_sentences(text:str) -> int:
+    return len(re.findall('<p>(.*?)</p>', text))

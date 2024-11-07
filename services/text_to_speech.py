@@ -29,7 +29,7 @@ def create_voice_file(text:str, path:str, uuid:str, teacher:str="👩‍🦰", e
   voice = select_voice(teacher, emotion)
   for i, s in enumerate(sentences):
     resonse = run_nvidia_fastpitch_hifigan_tts(s, i, voice)
-    file_name = f"{i}.mp3"
+    file_name = f"{i}.wav"
     file_list.append(file_name)
   copy_multiple_files(file_list, file_save_path)
 
@@ -84,7 +84,7 @@ def run_openai_tts(text: str, file_save_path: str, i: int) -> bool:
       speed=1,
     ) as response:
       try:
-        response.stream_to_file(f"{file_save_path}/{i}.mp3")
+        response.stream_to_file(f"{file_save_path}/{i}.wav")
       except Exception as e:
         st.error(e, "😩")
 
@@ -119,7 +119,7 @@ def run_nvidia_fastpitch_hifigan_tts(text: str, i: int, voice:str) -> bool:
                 "--text", text,\
                 "--voice", voice,\
                 # "--output", f"{file_save_path}/{i}.wav"]
-                "--output", f"{i}.mp3"]
+                "--output", f"{i}.wav"]
 
     # Run the command
     result = subprocess.run(command, capture_output=True, text=True)

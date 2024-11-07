@@ -1,7 +1,9 @@
 from llama_index.core.llms import ChatMessage
 from llama_index.llms.openai import OpenAI as OpenAILlamaIndex
-from llama_index.core import PromptTemplate
+from llama_index.core import PromptTemplate, SummaryIndex
+from llama_index.readers.web import SimpleWebPageReader
 from openai import OpenAI as OpenAIOriginal
+import streamlit as st
 
 from nemoguardrails import RailsConfig, LLMRails
 
@@ -10,7 +12,7 @@ import os
 import nest_asyncio
 
 from prompts.system_prompt import SYSTEM_PROMPT
-from prompts.templates.user_template import USER_TEMPLATE
+from prompts.templates.user_template import USER_TEMPLATE_GENERATE, USER_TEMPLATE_EXTRACT
 
 from config import Config
 
@@ -33,7 +35,7 @@ def check_nvidia_api_key():
     return nvapi_key
 
 
-def generate_text(language_name="English", topic="Foods", num_sentences=5, level="Beginner", model=Config.NVIDIA_NIM_GUARDRAILS) -> str:
+def generate_text(language_name="English", topic="Foods", topic_url=None, num_sentences=5, level="Beginner", model=Config.NVIDIA_NIM_GUARDRAILS) -> str:
   """
   Generate text for shadowing practice.
   """
@@ -42,7 +44,7 @@ def generate_text(language_name="English", topic="Foods", num_sentences=5, level
   elif model == Config.NVIDIA_NIM_META_LLAMA_3_2_3B_INSTRUCT:
     text = use_nvidia_nim_meta_llama_3_2_3b_instruct(language_name, topic, num_sentences, level)
   elif model == Config.NVIDIA_NIM_GUARDRAILS:
-    text = use_nvidia_guardrails(language_name, topic, num_sentences, level)    
+    text = use_nvidia_guardrails(language_name, topic, topic_url, num_sentences, level)    
   else:
     st.error("😩Please select a model.😩", "😩")
 
@@ -63,7 +65,7 @@ def use_openai_gpt_4o_mini(language_name, topic, num_sentences, level, openai_ap
                     max_retries=2,
                     openai_api_key=openai_api_key)
     
-    user_prompt = PromptTemplate(USER_TEMPLATE).format(language_name=language_name, topic=topic, num_sentences=num_sentences, level=level)
+    user_prompt = PromptTemplate(USER_TEMPLATE_GENERATE).format(language_name=language_name, topic=topic, content=None, num_sentences=num_sentences, level=level)
     messages = [
                 ChatMessage(role="system", content=SYSTEM_PROMPT),
                 ChatMessage(role="user", content=user_prompt)
@@ -84,7 +86,7 @@ def use_nvidia_nim_meta_llama_3_2_3b_instruct(language_name, topic, num_sentence
         api_key = nvidia_api_key
     )   
 
-    user_prompt = PromptTemplate(USER_TEMPLATE).format(language_name=language_name, topic=topic, num_sentences=num_sentences, level=level)
+    user_prompt = PromptTemplate(USER_TEMPLATE_GENERATE).format(language_name=language_name, topic=topic, content=None, num_sentences=num_sentences, level=level)
     messages = [
                 ChatMessage(role="system", content=SYSTEM_PROMPT),
                 ChatMessage(role="user", content=user_prompt)
@@ -102,7 +104,7 @@ def use_nvidia_nim_meta_llama_3_2_3b_instruct(language_name, topic, num_sentence
     return text
 
 
-def use_nvidia_guardrails(language_name, topic, num_sentences, level):
+def use_nvidia_guardrails(language_name, topic, topic_url, num_sentences, level):
     """
     Use NVIDIA's guardrails.
     At this time, the model is llama-3.2-3b-instruct fixed.
@@ -110,11 +112,30 @@ def use_nvidia_guardrails(language_name, topic, num_sentences, level):
     config = RailsConfig.from_path("./config")
     rails = LLMRails(config)
 
-    user_prompt = PromptTemplate(USER_TEMPLATE).format(language_name=language_name, topic=topic, num_sentences=num_sentences, level=level)
-    messages = [
-                {"role": "user", "content": user_prompt}    # system prompt is not needed because it is already included in the NemoGuardrails' config.yml
-            ]
+    if topic_url is None:
+      user_prompt = PromptTemplate(USER_TEMPLATE_GENERATE).format(language_name=language_name, topic=topic, content=None, num_sentences=num_sentences, level=level)
+      messages = [{
+            "role": "user",   # system prompt is not needed because it is already included in the NemoGuardrails' config.yml
+            "content": user_prompt
+      }]
+    elif topic_url is not None:
+      print(f"topic_url= {topic_url}")
+      documents = SimpleWebPageReader(html_to_text=True).load_data([topic_url])
+      print(f"documents[0]: {documents[0]}")
+      index = SummaryIndex.from_documents(documents)
+
+      query_engine = index.as_query_engine()
+      response_topic_detail = query_engine.query(PromptTemplate(USER_TEMPLATE_EXTRACT).format(topic=topic))
+      print(f"response_topic_detail: {response_topic_detail}")
+
+      user_prompt = PromptTemplate(USER_TEMPLATE_GENERATE).format(language_name=language_name, topic=topic, content=str(response_topic_detail), num_sentences=num_sentences, level=level)
+      messages = ([
+          {
+            "role": "user",
+            "content": user_prompt
+          }
+      ])
     response = rails.generate(messages=messages)
     info = rails.explain()
-    print(response['content'])
+    print(f"generate response: {response['content']}")
     return response['content']

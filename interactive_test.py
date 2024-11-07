@@ -26,10 +26,24 @@ openai_api_key = str(os.getenv("OPENAI_API_KEY"))
 config = RailsConfig.from_path("./config")
 rails = LLMRails(config)
 
-user_prompt = PromptTemplate(USER_TEMPLATE).format(language_name="English", topic="Russia invades Ukline", num_sentences=10, level="Beginner")
+# user_prompt = PromptTemplate(USER_TEMPLATE).format(language_name="English", topic="Michael Jackson", num_sentences=10, level="Proficiency")
+# messages = [
+#             {"role": "user", "content": user_prompt}    # system prompt is not needed because it is already included in the NemoGuardrails' config.yml
+#         ]
+response_topic_detail = "Jackson sang from childhood, and over time his voice and vocal style changed. Between 1971 and 1975, his voice descended from boy soprano to lyric tenor.[461] He was known for his vocal range.[426] With the arrival of Off the Wall in the late 1970s, Jackson's abilities as a vocalist were well regarded; Rolling Stone compared his vocals to the \"breathless, dreamy stutter\" of Stevie Wonder, and wrote that \"Jackson's feathery-timbred tenor is extraordinarily beautiful."
+user_prompt = PromptTemplate(USER_TEMPLATE).format(language_name="English", topic="Michael Jackson", content={response_topic_detail}, num_sentences=10, level="Advanced")
 messages = [
-            {"role": "user", "content": user_prompt}    # system prompt is not needed because it is already included in the NemoGuardrails' config.yml
-        ]
+    # {
+    # "role": "context",
+    # "content": {"relevant_chunks": """
+    #     Michael Jackson's vocal style: Jackson sang from childhood, and over time his voice and vocal style changed. Between 1971 and 1975, his voice descended from boy soprano to lyric tenor.[461] He was known for his vocal range.[426] With the arrival of Off the Wall in the late 1970s, Jackson's abilities as a vocalist were well regarded; Rolling Stone compared his vocals to the \"breathless, dreamy stutter\" of Stevie Wonder, and wrote that \"Jackson's feathery-timbred tenor is extraordinarily beautiful.
+    # """}
+    # },
+    {
+    "role": "user",
+    "content": user_prompt
+    }
+]
 response = rails.generate(messages=messages)
 
 #%%
@@ -42,8 +56,12 @@ info = rails.explain()
 #%%
 info.print_llm_calls_summary()
 
+#%%
+print(info.llm_calls[0].prompt)
 
- 
+# %%
+print(info.llm_calls[0].completion)
+
 # %%
 print(info.llm_calls[1].prompt)
 # %%
