@@ -4,6 +4,9 @@ class Config:
     OPENAI_GPT_4O_MINI = "OpenAI/gpt-4o-mini"
     META_LLAMA_3_2_3b_INSTRUCT = "meta/llama-3.2-3b-instruct"
     NVIDIA_NIM_META_LLAMA_3_2_3B_INSTRUCT = "NVIDIA NIM/meta/llama-3.2-3b-instruct"
+    NVIDIA_NIM_NVIDIA_EMBEDQA_e5_v5 = "nvidia/nv-embedqa-e5-v5"
+    NVIDIA_NIM_LLAMA_3_2_NV_EMBEDQA_1B_V1 = "llama-3.2-nv-embedqa-1b-v1"
+    NVIDIA_NIM_NV_EMBEDQA_MISTRAL_7B_V2 = "nvidia/nv-embedqa-mistral-7b-v2"
     NVIDIA_NIM_GUARDRAILS = "NVIDIA Guardrails"
 
     # NVIDIA_TextToSpeech_VOICE

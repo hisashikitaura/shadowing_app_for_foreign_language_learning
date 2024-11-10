@@ -5,12 +5,6 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-from llms.utils import use_openai_gpt_4o_mini, use_nvidia_nim_meta_llama_3_2_3b_instruct, use_nvidia_guardrails, generate_text
-from services.text_to_speech import run_openai_tts, run_nvidia_fastpitch_hifigan_tts, create_voice_file
-from utils.utils import show_text, create_path, get_uuid
-from services.store import store_text, store_user_preference
-from config import Config
-
 load_dotenv()
 
 openai_api_key = str(os.getenv("OPENAI_API_KEY"))
@@ -28,14 +22,14 @@ st.set_page_config(
         'About': "# Good Luck!"
     }
 )
-st.title('Let\'s do Shadowing!')
+st.title('🐶🐶Let\'s do Shadowing!🐶🐶')
 st.logo(image="./image/dog.png", size="medium", link=None, icon_image=None)
 
 
 pg = st.navigation([st.Page("01_lets_generate.py", title="🐣Let\'s generate!🐣", icon=None, default=True),
                     st.Page("02_lets_choose.py", title="🐤Let\'s choose!🐤", icon=None, default=False),
                     st.Page("03_lets_do_shadowing.py", title="🐔Let\'s do Shadowing!🐔", icon=None, default=False),
-                    st.Page("04_sample_voice.py", title="👄👄Sample Voice👄👄", icon=None, default=False)])
+                    st.Page("99_sample_voice.py", title="👄👄Sample Voice👄👄", icon=None, default=False)])
 pg.run()
 
 

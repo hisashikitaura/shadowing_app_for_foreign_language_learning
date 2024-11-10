@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-from llms.utils import generate_text
+from llms.utils import create_text
 from services.text_to_speech import create_voice_file
 from utils.utils import show_text, show_error, get_uuid
 from services.store import store_text, store_user_preference
@@ -16,7 +16,6 @@ load_dotenv()
 
 openai_api_key = str(os.getenv("OPENAI_API_KEY"))
 file_save_path = Path(__file__).parent / "store"
-print(f"file_save_path: {file_save_path}")
 
 # def if_rerun():
 
@@ -34,11 +33,11 @@ with st.form('🐮🐮🐮Improve your foreign language skills🐮🐮🐮'):
     # ("Afrikaans", "Arabic", "Armenian", "Azerbaijani", "Belarusian", "Bosnian", "Bulgarian", "Catalan", "Chinese", "Croatian", "Czech", "Danish", "Dutch", "English", "Estonian", "Finnish", "French", "Galician", "German", "Greek", "Hebrew", "Hindi", "Hungarian", "Icelandic", "Indonesian", "Italian", "Japanese", "Kannada", "Kazakh", "Korean", "Latvian", "Lithuanian", "Macedonian", "Malay", "Marathi", "Maori", "Nepali", "Norwegian", "Persian", "Polish", "Portuguese", "Romanian", "Russian", "Serbian", "Slovak", "Slovenian", "Spanish", "Swahili", "Swedish", "Tagalog", "Tamil", "Thai", "Turkish", "Ukrainian", "Urdu", "Vietnamese", "Welsh"),
       ("English", "French", "German", "Italian", "Spanish", "Chinese"),
   )
-  topic = st.text_input(label='🐻🐻🐻What topics??🐻🐻🐻 :', value=previous_topic)
+  topic = st.text_input(label='🐻🐻🐻What topics??🐻🐻🐻 :', value=None)
 
   topic_url = None
-  _topic_url = st.text_input(label="[Optional] From this website, the phrases on the topic can be extracted. *This may take a few minutes..", value=previous_topic_url, placeholder="www.nvidia.com/en-us/")
-  if _topic_url is not None:
+  _topic_url = st.text_input(label="[Optional] From this website, the phrases on the topic can be extracted. *This may take a few minutes..", value=None, placeholder="www.nvidia.com/en-us/")
+  if _topic_url is not None and _topic_url != "":
     if validators.url(_topic_url):
       topic_url = _topic_url
     else:
@@ -97,11 +96,11 @@ with st.form('🐮🐮🐮Improve your foreign language skills🐮🐮🐮'):
 
   submitted = st.form_submit_button('Submit')
   if submitted:
-    print("before generate_text")
-    text = generate_text(language_name, topic, topic_url, num_sentences, level, model=Config.NVIDIA_NIM_GUARDRAILS)
-    print("after generate_text")
+    text = create_text(language_name, topic, topic_url, num_sentences, level, model=Config.NVIDIA_NIM_GUARDRAILS)
 
-    if text == "I'm not sure what to say." or text == "I'm sorry, I can't respond to that.":
+    if text == "I'm not sure what to say." or \
+      text == "I'm sorry, I can't respond to that." or \
+      text == "I can't help you with that. Can I help you with something else?":
       show_error()
       st.stop()
 
@@ -113,14 +112,12 @@ with st.form('🐮🐮🐮Improve your foreign language skills🐮🐮🐮'):
 
     if not st.session_state.flag["create_voice_flag"]:
       show_text(text)
-    print("create_voice_flag: ", st.session_state.flag["create_voice_flag"])
 
     st.session_state.user["text"] = text
 
   if "flag" not in st.session_state:
     pass
   elif st.session_state.flag["create_voice_flag"]:
-    print("elif st.session_state.flag")
     uuid = get_uuid()
     text = st.session_state.user["text"]
     topic = st.session_state.user["topic"]
@@ -130,6 +127,7 @@ with st.form('🐮🐮🐮Improve your foreign language skills🐮🐮🐮'):
     store_user_preference(text, file_save_path, topic, level, uuid, teacher, emotion)
 
     st.session_state.flag["show_text"] = False
+    st.session_state.flag["create_voice_flag"] = False
     
     st.switch_page("02_lets_choose.py")
 
@@ -138,7 +136,7 @@ with st.form('🐮🐮🐮Improve your foreign language skills🐮🐮🐮'):
   What is teacher's feeling?
   Listen to the sample voice!
   """
-  st.page_link("04_sample_voice.py", label="👄👄Sample Voice👄👄", icon=None)
+  st.page_link("99_sample_voice.py", label="👄👄Sample Voice👄👄", icon=None)
 
 
 

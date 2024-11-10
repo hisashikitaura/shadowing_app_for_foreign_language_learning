@@ -1,9 +1,9 @@
 prompts:
   - task: self_check_input
     content: |
-      Your task is to check if the user message below complies with the generated text policy for shadowing app.
+      Your task is to check if the user message below complies with the created text policy for shadowing app.
 
-      Generate text policy for the user messages:
+      Create text policy for the user messages:
       - should not contain harmful topic
       - should not contain murder topic
       - should not contain obcene topic

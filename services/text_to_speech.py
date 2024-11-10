@@ -18,7 +18,7 @@ def create_voice_file(text:str, path:str, uuid:str, teacher:str="👩‍🦰", e
   This function is for one sentence.
   """
   print("Creating voice file...")
-  print(f"no1. text: {text}, path: {path}, uuid: {uuid}, teacher: {teacher}, emotion: {emotion}")
+  # print(f"no1. text: {text}, path: {path}, uuid: {uuid}, teacher: {teacher}, emotion: {emotion}")
   # split the text into sentences
   sentences = []
   sentences = re.findall('<p>(.*?)</p>', text)
@@ -106,7 +106,7 @@ def run_nvidia_fastpitch_hifigan_tts(text: str, i: int, voice:str) -> bool:
             "English-US.Male-Happy",
             "English-US.Female-Sad"
     """
-    print(f"no2. text: {text}, i: {i}, voice: {voice}")
+    # print(f"no2. text: {text}, i: {i}, voice: {voice}")
     nvidia_api_key = check_nvidia_api_key()
 
     # Define the command as a list of arguments
@@ -118,7 +118,6 @@ def run_nvidia_fastpitch_hifigan_tts(text: str, i: int, voice:str) -> bool:
                 "--metadata", "authorization", f"Bearer {nvidia_api_key}",\
                 "--text", text,\
                 "--voice", voice,\
-                # "--output", f"{file_save_path}/{i}.wav"]
                 "--output", f"{i}.wav"]
 
     # Run the command
@@ -126,8 +125,8 @@ def run_nvidia_fastpitch_hifigan_tts(text: str, i: int, voice:str) -> bool:
 
     # Check the result
     if result.returncode == 0:
-      print("Script ran successfully")
-      print("Output:", result.stdout)
+      # print("Script ran successfully")
+      # print("Output:", result.stdout)
       return True
     else:
       print("Script failed")

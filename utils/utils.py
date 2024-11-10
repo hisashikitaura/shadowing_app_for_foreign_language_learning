@@ -29,56 +29,6 @@ def create_path(base_path:str, dir_name:str="temp") -> str:
   return path_joined
 
 
-@st.dialog("😏Try to listen!😏")
-def play_voice():
-  """
-  This shows modal dialog with the generated text.
-  And a user has to choose one.
-  st.dial
-  """
-  """
-  👩‍🦰 ✖️ 😐
-  """
-  st.audio(f"{Config.SAMPLE_VOICE}\{Config.VOICE_ENG_FEMALE_1}.mp3", format=Config.AUDIO_MPEG, loop=False)
-  """
-  👩‍🦰 ✖️ 🥰
-  """
-  st.audio(f"{Config.SAMPLE_VOICE}\{Config.VOICE_ENG_FEMALE_HAPPY}.mp3", format=Config.AUDIO_MPEG, loop=False)
-  """
-  👩‍🦰 ✖️ 😴
-  """
-  st.audio(f"{Config.SAMPLE_VOICE}\{Config.VOICE_ENG_FEMALE_CALM}.mp3", format=Config.AUDIO_MPEG, loop=False)  
-  """
-  👩‍🦰 ✖️ 😡
-  """
-  st.audio(f"{Config.SAMPLE_VOICE}\{Config.VOICE_ENG_FEMALE_ANGRY}.mp3", format=Config.AUDIO_MPEG, loop=False)  
-  """
-  👩‍🦰 ✖️ 😑
-  """
-  st.audio(f"{Config.SAMPLE_VOICE}\{Config.VOICE_ENG_FEMALE_NEUTRAL}.mp3", format=Config.AUDIO_MPEG, loop=False)  
-  """
-  
-  👨‍🦰 ✖️ 😐
-  """
-  st.audio(f"{Config.SAMPLE_VOICE}\{Config.VOICE_ENG_MALE_1}.mp3", format=Config.AUDIO_MPEG, loop=False)
-  """
-  👨‍🦰 ✖️ 🥰
-  """
-  st.audio(f"{Config.SAMPLE_VOICE}\{Config.VOICE_ENG_MALE_HAPPY}.mp3", format=Config.AUDIO_MPEG, loop=False)
-  """
-  👨‍🦰 ✖️ 😴
-  """
-  st.audio(f"{Config.SAMPLE_VOICE}\{Config.VOICE_ENG_MALE_CALM}.mp3", format=Config.AUDIO_MPEG, loop=False)  
-  """
-  👨‍🦰 ✖️ 😡
-  """
-  st.audio(f"{Config.SAMPLE_VOICE}\{Config.VOICE_ENG_MALE_ANGRY}.mp3", format=Config.AUDIO_MPEG, loop=False)  
-  """
-  👨‍🦰 ✖️ 😑
-  """
-  st.audio(f"{Config.SAMPLE_VOICE}\{Config.VOICE_ENG_MALE_NEUTRAL}.mp3", format=Config.AUDIO_MPEG, loop=False) 
-  st.rerun() 
-
 @st.dialog("😏Your favorite text??😏")
 def show_text(text) -> bool:
   """
@@ -87,12 +37,10 @@ def show_text(text) -> bool:
   st.dialog function can't return a value.
   """
   if st.session_state.flag["show_text"] == False:
-    print(f"show_text: start")
     _text = text.replace("<p>", "<p>💙")
     sentences = re.findall('<p>(.*?)</p>', _text)
     for s in sentences:
       st.write_stream(stream_data(s, 0.02))
-    print(f"show_text: end")
     st.session_state.flag["show_text"] = True
 
   if st.button("😍YES!😍", key=0, type="primary"):
@@ -169,7 +117,6 @@ def copy_file_with_error_handling(source_file, destination_dir):
         return False
 
 def stream_data(text:str, wait_time=0.01):
-   print(f"stream_data: {text}")
    for word in text.split(" "):
       yield word + " "
       time.sleep(wait_time)
@@ -188,3 +135,54 @@ def get_sentences(text:str) -> list:
 
 def get_num_sentences(text:str) -> int:
     return len(re.findall('<p>(.*?)</p>', text))
+
+
+@st.dialog("😏Try to listen!😏")
+def play_voice():
+  """
+  This shows modal dialog with the generated text.
+  And a user has to choose one.
+  st.dial
+  """
+  """
+  👩‍🦰 ✖️ 😐
+  """
+  st.audio(f"{Config.SAMPLE_VOICE}\{Config.VOICE_ENG_FEMALE_1}.mp3", format=Config.AUDIO_MPEG, loop=False)
+  """
+  👩‍🦰 ✖️ 🥰
+  """
+  st.audio(f"{Config.SAMPLE_VOICE}\{Config.VOICE_ENG_FEMALE_HAPPY}.mp3", format=Config.AUDIO_MPEG, loop=False)
+  """
+  👩‍🦰 ✖️ 😴
+  """
+  st.audio(f"{Config.SAMPLE_VOICE}\{Config.VOICE_ENG_FEMALE_CALM}.mp3", format=Config.AUDIO_MPEG, loop=False)  
+  """
+  👩‍🦰 ✖️ 😡
+  """
+  st.audio(f"{Config.SAMPLE_VOICE}\{Config.VOICE_ENG_FEMALE_ANGRY}.mp3", format=Config.AUDIO_MPEG, loop=False)  
+  """
+  👩‍🦰 ✖️ 😑
+  """
+  st.audio(f"{Config.SAMPLE_VOICE}\{Config.VOICE_ENG_FEMALE_NEUTRAL}.mp3", format=Config.AUDIO_MPEG, loop=False)  
+  """
+  
+  👨‍🦰 ✖️ 😐
+  """
+  st.audio(f"{Config.SAMPLE_VOICE}\{Config.VOICE_ENG_MALE_1}.mp3", format=Config.AUDIO_MPEG, loop=False)
+  """
+  👨‍🦰 ✖️ 🥰
+  """
+  st.audio(f"{Config.SAMPLE_VOICE}\{Config.VOICE_ENG_MALE_HAPPY}.mp3", format=Config.AUDIO_MPEG, loop=False)
+  """
+  👨‍🦰 ✖️ 😴
+  """
+  st.audio(f"{Config.SAMPLE_VOICE}\{Config.VOICE_ENG_MALE_CALM}.mp3", format=Config.AUDIO_MPEG, loop=False)  
+  """
+  👨‍🦰 ✖️ 😡
+  """
+  st.audio(f"{Config.SAMPLE_VOICE}\{Config.VOICE_ENG_MALE_ANGRY}.mp3", format=Config.AUDIO_MPEG, loop=False)  
+  """
+  👨‍🦰 ✖️ 😑
+  """
+  st.audio(f"{Config.SAMPLE_VOICE}\{Config.VOICE_ENG_MALE_NEUTRAL}.mp3", format=Config.AUDIO_MPEG, loop=False) 
+  st.rerun() 

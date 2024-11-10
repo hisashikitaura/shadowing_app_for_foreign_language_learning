@@ -12,13 +12,10 @@ load_dotenv()
 
 openai_api_key = str(os.getenv("OPENAI_API_KEY"))
 file_open_path = Path(__file__).parent / "store"
-print(f"file_open_path: {file_open_path}")
 
-st.title('🐶🐶Let\'s do Shadowing🐶🐶')
 st.logo(image="./image/dog.png", size="medium", link=None, icon_image=None)
 
 df = pd.read_csv(f"{file_open_path}/{Config.USER_PREFERENCE_FILE}", header=None, names=["topic", "level", "uuid", "gender", "emotion", "first_sentence"])
-# df = df.set_axis(["topic", "level", "uuid", "gender", "emotion", "first_sentence"], axis=1)
 print(f"df: {df}")
 "😏Which topic do you want to do?😏"
 "🤩Choose & Do Shadowing🤩"
