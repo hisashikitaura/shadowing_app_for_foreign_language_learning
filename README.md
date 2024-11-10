@@ -17,15 +17,10 @@ Please enjoy it and don't hesitate to ask me anything.
 
 ## Technologies Used
 
-- NVIDIA NeMo GuardRails
 * [NVIDIA NeMo GuardRails](https://docs.nvidia.com/nemo/guardrails/introduction.html)
-- NVIDIA NIM (meta/llama-3.1-405b-instruct)
 * [NVIDIA NIM (meta/llama-3.1-405b-instruct)](https://build.nvidia.com/meta/llama-3_1-405b-instruct)
-- NVIDIA NIM (nvidia/fastpitch-hifigan-tts)
 * [NVIDIA NIM (nvidia/fastpitch-hifigan-tts)](https://build.nvidia.com/nvidia/fastpitch-hifigan-tts)
-- LlamaIndex (Faiss Vector Store)
 * [LlamaIndex (Faiss Vector Store)](https://docs.llamaindex.ai/en/stable/examples/vector_stores/FaissIndexDemo/)
-- NVIDIA NIM (nvidia/nv-embedqa-mistral-7b-v2) * as a custom embedding provider within LlamaIndex
 * [NVIDIA NIM (nvidia/nv-embedqa-mistral-7b-v2)](https://build.nvidia.com/nvidia/nv-embedqa-mistral-7b-v2)
 - Streamlit
 
